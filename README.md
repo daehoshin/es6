@@ -691,3 +691,286 @@ c.go()
 > 제너레이터
 
 아몰랑..
+
+###chapter 15 - 날짜와 시간
+
+- 자바스크립트의 Date 객체는 기능이 불충분
+- 이 장에서는 Moment.js를 소개
+
+> 15.1 날짜, 타임존, 타임스탬프, 유닉스 시간
+
+- 1970년 1월 1일 0시 0분 0초(UTC) 기준 0초
+- 타임존 UTC 기준으로 한 시차로 나누어짐
+    - UTC는 그리니치 표준시 라고 불리기도 함(GMT+0900)
+- 태평양 타임존은 UTC보다 7~8시간 뒤에 있음
+    - 여름 7시간 그외 8시간
+    
+```
+const d = new Date();
+console.log(d);             // 타임존이 들어간 그레고리력 날짜 
+console.log(d.valueOf());   // 유닉스 타임스탬프
+```
+
+> 15.2 Date 객체 만들기
+
+- Date 객체 선언 방법 4가지
+
+1. 매개변수 없이 선언
+
+    ```
+        - new Date();      // 현재 날짜
+    ```
+
+1. 그레고리력
+
+    ```
+        // 월은 0으로 시작함(0->1월, 1->2월, 5->?)
+        - new Date(2015, 0);                            // 2015년 1월 1일 0시 
+        - new Date(2015, 1);                            // 2015년 2월 1일 0시
+        - new Date(2015, 1, 14);                        // 2015년 2월 14일 0시
+        - new Date(2015, 1, 14, 13);                    // 2015년 2월 14일 오후 1시
+        - new Date(2015, 1, 14, 13, 30);                // 2015년 2월 14일 오후 1시 30분
+        - new Date(2015, 1, 14, 13, 30, 5);             // 2015년 2월 14일 오후 1시 30분 5초
+        - new Date(2015, 1, 14, 13, 30, 5, 500);        // 2015년 2월 14일 오후 1시 30분 5.5초
+        
+        -> 일은 1부터 시작 초는 1000이 1초
+    ```
+
+1. 유닉스 타임스탬프
+
+    ```
+        new Date();                     // 12:00 A.M., Jan 1, 1970 UTC
+        new Date(1000);                 // 12:00:01 A.M., Jan 1, 1970 UTC
+        new Date(1463443200000);        // 5:00 P.M., May 16, 2016 UTC
+    ``` 
+
+1. 유닉스 시간 원점 이전 날짜 구할때
+
+    ```
+        new Date(-365*24*60*60*1000);       // 12:00 A.M., Jan 1, 1969 UTC
+    ``` 
+
+1. 날짜 문자열 해석 (표준시 기준)
+
+    ```
+    new Date('June 14, 1903');              // 12:00 A.M., Jun 14, 1903 지역 표준시
+    new Date('June 14, 1903 GMT-0000');     // 12:00 A.M., Jun 14, 1903 UTC
+    ```
+
+> 15.3 Moment.js
+
+- 타임존을 지원하는 버전과 지원하지 않는 버전 2가지
+
+- 호출
+
+    ```
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.4.0/moment-timezone.min.js"></script>
+    npm install --save moment-timezone
+    const moment = require('moment-timezone');
+    ```
+
+> 15.4 현실적인 자바스크립트 날짜 접근법
+
+[]Date 객체 MDN 문서](https://goo.gl/DaGfQ)
+
+> 15.5 날짜 데이터 만들기
+
+1. 서버에서 날짜 생성하기
+    
+    - UTC를 사용하거나 타임존을 명시
+    - 클라우드 기반 애플리케이션을 운영하면 똑같은 코드가 전 세계 모든곳에서 실행
+    - 특정 지역을 기준으로 생성하면 안됨
+    
+    ```
+        const d = new Date(Date.UTC(2016, 4, 27));  // May 27, 2016 UTC
+    ```
+    
+    - 특정 타임존에 있는 서버에서 날짜를 생성할때는 moment.tz를 써서 Date 인스턴스를 만들면 타임존을 손으로 변환할 필요가 없음
+    
+    ```
+        // Moment.js에 넘기는 배열은 자바스크립트의 Date 생성자에 넘기는 매개변수와 같다
+        // 월은 0부터 시작
+        // toDate() 메서드는 Moment.js 객체를 자바스크립트 Date 객체로 변환함
+        
+        const d = moment.tz([2016, 3, 27, 9, 19], 'America/Los_angeles').toDate();  // 2016-04-27T16:19:00.000Z
+        const s = moment.tz([2016, 3, 27, 9, 19], 'Asia/Seoul').toDate();           // 2016-04-27T00:19:00.000Z
+    ```
+    
+1. 브라우저에서 날짜 생성하기
+
+    - 브라우저에서는 운영체제를 기준으로 타임존 정보 제공
+    - 앱에서 다른 타임존의 날짜를 처리해야 한다면 Moment.js를 이용해 타임존을 변환
+    
+> 15.6 날짜 데이터 전송하기
+
+- 서버-브라우저간 날짜 전송시 UTC 기준으로 유닉스 타임스탬프를 저장함
+
+- 자바스크립트에서 날짜 전송하는 가장 확실한 방법은 JSON을 사용하는 것
+
+    ```
+        const before = { d: new Date()};
+        before.d instanceof Date            // true
+        const json = JSON.stringify(before);
+        const after = JSON.parse(json);
+        after.d instanceof Date             // false
+        typeof after.d                      // string
+        
+    ```
+    
+1. JSON으로 인코드된 날짜는 UTC
+
+1. JSON으로 인코드된 문자열을 Date 생성자에 넘겨서 얻는 날짜는 사용자의 타임존을 기준
+
+1. 문자열로 인코드하지 않고 valueOf() 메서드로 얻은 숫자를 그냥 전송해도 됨
+
+    ```
+        const before = { d: new Date().valueOf() };
+        typeof before.d             // "number"
+        const json = JSON.stringify(before);
+        const after = JSON.parse(json);
+        typeof after.d              // "number"
+        const d = new Date(after.d);
+    ```
+    
+    - 자바스크립트에서 JSON은 인코드된 날짜 문자열을 일관되게 처리함
+    
+    - 다른 언어는 그렇지 않기 때문에 직렬화를 어떻게 하는지 알아둬야 함
+    
+    - 유닉스 타임스탬프를 주고받는 편이 더 안전함
+    
+        - 숫자형 값을 밀리초가 아니라 초 기준으로 해석하는 라이브러리도 많음
+        
+> 15.7 날짜 형식
+
+    ```
+    const d = new Date(Date.UTC(1930, 4, 10));
+    
+    // 다음 결과는 로스앤젤리스에 사는 사람 기준
+    
+    d.toLocaleDateString();     // 1930-5-10
+    d.toLocaleFormat();         // <- 안됨 (var date = new Date().toLocaleDateString(); console.log(date);
+    d.toLocaleTimeString();     // 08:00:00
+    d.toTimeString();           // 08:00:00 GMT+0800 (GMT+09:00)
+    d.toUTCString();            // Sat, 10 May 1930 00:00:00 GMT
+    
+    moment(d).format("YYYY-MM-DD");                 // 1930-05-10
+    moment(d).format("YYYY-MM-DD HH:mm");           // 1930-05-10 08:00
+    moment(d).format("YYYY-MM-DD HH:mm Z");         // 1930-05-10 08:00 +08:00
+    moment(d).format("YYYY-MM-DD HH:mm [UTC]Z");    // 1930-05-10 08:00 UTC+08:00
+    moment(d).format("YYYY년 M월 D일 HH:mm");       // 1930년 5월 10일 08:00
+    
+    moment(d).format("dddd, MMMM [the] Do, YYYY"); // Saturday, May the 10th, 1930
+    
+    moment(d).format("YYYY-MM-DD"); // 1930-05-10
+    ```
+    
+    -> Date는 일관성 없으므로 moment.js의 온라인 문서 참고
+    
+> 15.8 날짜 구성 요소
+
+- Date 인스턴스의 각 구성 요소에 접근할 때는 다음 메서드 사용
+
+```
+    const t = new Date(Date.UTC(1815, 9, 10));
+    
+    // 다음 결과는 로스앤젤리스 기준
+    t.getFullYear();
+    t.getMonth();
+    t.getDate();
+    t.getDay();
+    t.getHours();
+    t.getMinutes();
+    t.getSeconds();
+    t.getMilliseconds();
+    
+    // UTC 기준 메서드
+    t.getUTCFullYear();
+    t.getUTCMonth();
+    t.getUTCDate();
+```
+
+> 15.9 날짜 비교
+
+- 날짜 A와 날짜 B중 어느쪽이 더 앞인가 하는 비교
+
+    - Date 인스턴스는 날짜를 숫자로 저장하므로 비교 연산자 통해 가능
+    
+    ```
+        const d1 = new Date(1996, 2, 1);
+        const d2 = new Date(2009, 4, 27);
+        
+        d1 > d2         // false
+        d1 < d2         // true
+    ```
+    
+> 15.10 날짜 연산
+
+- 날짜는 숫자이므로 날짜에서 날짜를 빼면 몇 밀리초가 지났는지 알수 있다
+
+```
+const msDiff = d2 -d1;    // 417740400000 ms
+const daysDiff = msDiff/1000/60/60/24;    // 4834.96 days
+```
+
+- Array.prototype.sort로 정렬 가능
+
+```
+    const dates = [];
+    
+    // 랜덤한 날짜를 몇 개 만듬
+    const min = new Date(2017, 0, 1).valueOf();
+    const delta = new Date(2020, 0, 1).valueOf() - min;
+    for(let i = 0; i<10; i++)
+        dates.push(new Date(min+delta*Math.random()));
+        
+    // dates 배열은 랜덤으로 만들었으므로 뒤죽박죽일 것임
+    // 다음과 같이 역순으로 정렬
+    dates.sort((a, b) => b-a);
+    // 날짜순으로 정렬할 수도 있음
+    dates.sort((a, b) => a-b);   
+```
+
+- Moment.js에서 날짜를 빼거나 더하는데 유용한 메서드
+
+```
+let m = moment();           // 현재
+m.add(3, 'days');           // m은 이제 3일 뒤
+m.subtract(2, 'years');     // m은 이제 2년 전으로부터 3일이 지난 날짜임
+
+m = moment();               // 리셋
+m.startOf('year');          // m은 이제 올해의 1월 1일
+m.endOf('month');           // m은 이제 올해의 1월 31일
+```
+
+- Moment.js는 메서드 체인으로 연결 가능
+
+let m = moment().add(10, 'hours').subtract(3, 'days').endOf('month');
+// m은 이제 3일 전으로부터 10시간 뒤인 달의 마지막 순간
+
+> 15.11 사용자가 알기 쉬운 상대적 날짜
+
+```
+    moment().subtract(10, 'seconds').fromNow(); // a few seconds ago
+    moment().subtract(44, 'seconds').fromNow(); // a few seconds ago
+    moment().subtract(45, 'seconds').fromNow(); // a minute ago
+    moment().subtract(5, 'minutes').fromNow(); // 5 minutes ago
+    moment().subtract(44, 'minutes').fromNow(); // 44 minutes ago
+    moment().subtract(45, 'minutes').fromNow(); // an hour ago
+    moment().subtract(5, 'hours').fromNow(); // 4 hour ago
+    moment().subtract(21, 'hours').fromNow(); // 21 hour ago
+    moment().subtract(22, 'hours').fromNow(); // a day ago
+    moment().subtract(300, 'days').fromNow(); // 10 months ago
+    moment().subtract(345, 'days').fromNow(); // a year ago
+```
+
+> 15.12 요약
+
+- 자바스크립트의 날짜는 1970년 1월 1일 UTC로부터 몇 밀리초가 지났는지 나타내는 숫자
+
+- 날짜를 생성할때는 타임존에 유의 해야함
+
+- 날짜 형식을 자유롭게 바꿀 수 있어야 한다면 Moment.js 추천 
+
+###chapter 16 - Math
+
+###chapter 17 - 정규표현식
