@@ -764,10 +764,18 @@ console.log(d.valueOf());   // 유닉스 타임스탬프
 - 호출
 
     ```
-    <script src="//cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.4.0/moment-timezone.min.js"></script>
+    1. 자바스크립트에서 호출
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
+    const d = new Date(Date.UTC(1930, 4, 10));
+    moment().format();
+    console.log(moment(d).format("YYYY-MM-DD"));
+    
+    1. 노드JS에서 호출   
     npm install --save moment-timezone
     const moment = require('moment-timezone');
     ```
+
+[자세한 설명]('https://riptutorial.com/ko/momentjs')
 
 > 15.4 현실적인 자바스크립트 날짜 접근법
 
