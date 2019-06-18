@@ -973,4 +973,104 @@ let m = moment().add(10, 'hours').subtract(3, 'days').endOf('month');
 
 ###chapter 16 - Math
 
+- 수학 함수를 담고 있다
+
+- 복잡한 숫자나 큰 숫자, 전문적인 수식 구조나 알고리즘이 필요 하다면 Math.js 참조
+
+> 16.1.1 고정 소수점
+
+- 소수점 뒤 자리수 지정하는 형식은 toFixed() 사용
+
+```
+const x = 19.51;
+x.toFixed(3);       // 19.510
+x.toFixed(2);       // 19.51
+x.toFixed(1);       // 19.5
+x.toFixed(0);       // 20
+```
+
+> 16.1.2 지수 표기법
+
+- 지수 표기법은 toExponention() 사용
+
+```
+const x = 3800.5;
+x.toExponential(4); // 3.8005e+3;
+x.toExponential(3); // 3.801e+3;
+x.toExponential(2); // 3.80e+3;
+x.toExponential(1); // 3.8e+3;
+x.toExponential(0); // 4e+3;
+```
+
+- 이하 왜 하고 있는지 모르겠음..
+
+- 빈도수 높은 함수.. 그나마 Math.random(); 0이상 1 미만의 숫자를 반환
+
+- 그때 그때 필요한 것만 찾아서 쓰면 될거 같음
+
 ###chapter 17 - 정규표현식
+
+- 정규표현식은 정교한 문자열 매칭 기능 제공
+
+> 17.1 부분 문자열 검색과 대체
+
+    - 정규식을 쓰지 않고 메서드의 검색 및 교체 기능 사용
+    
+    ```
+    const input = "As I was going to Saint Ives";
+    
+    input.startsWith("As")          // true
+    input.endWith("Ives")           // true
+    input.startsWith("going", 9)    // true -- 인덱스 9에서 시작
+    input.endsWith("going", 14)     // true -- 인덱스 14를 문자열의 끝으로 간주
+    input.includes("going")         // true
+    input.includs("going", 10)      // false   
+    input.indexOf("going")          // 9
+    input.indexOf("going", 10)      // -1
+    input.indexOf("nope")           // -1
+    ```
+
+    - 위에 메서드는 모두 대소문자 구분 함
+    - 따라서 문자열만 적용 할때는 toLowerCase()를 사용하여야 함
+    - ex) input.toLowCase().startsWith("as")    // true
+    
+    - 문자열 교체
+    - ※ replace는 원래 문자열은 그대로 두고 새 문자열 리턴
+    
+    ```
+    const input = "As I was going to Saint Ives";
+    const output = input.replace("going", "walking");
+    ```      
+
+> 17.2 정규식 만들기
+
+    - 정규식을 만드는 방법은 RegExp의 생성자로 만듬
+    - 간편하게 만든느 방법은 슬래시로 감싸서 만들면 됨
+    
+    ```
+    const re1 = /going/;
+    const re2 = new RegExp("going");
+    ```
+
+> 17.3 정규식 검색
+> 17.4 정규식을 사용한 문자열 교체
+> 17.5 입력 소비
+> 17.6 대체
+> 17.7 HTML 찾기
+> 17.8 문자셋
+> 17.9 자주 쓰는 문자셋
+> 17.10 반복
+> 17.11 마침표와 이스케이프
+> 17.11.1 진정한 와일드카드
+> 17.12 그룹
+> 17.13 소극적 일치, 적극적 일치
+> 17.14 역참조
+> 17.15 그룹 교체
+> 17.16 함수를 이용한 교체
+> 17.17 위치 지정
+> 17.18 단어 경계 일치
+> 17.19 룩어헤드
+> 17.20 동적으로 정규식 만들기
+> 17.21 요약
+
+
